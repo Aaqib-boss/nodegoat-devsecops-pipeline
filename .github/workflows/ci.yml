@@ -27,3 +27,13 @@ jobs:
 
       - name: Gitleaks scan (fails on any finding)
         run: gitleaks detect --source . --verbose --redact --exit-code 1
+        
+  sast:
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Semgrep scan (fails on findings)
+        run: semgrep scan --config p/javascript --config p/nodejs --error
