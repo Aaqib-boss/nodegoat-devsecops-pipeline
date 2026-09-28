@@ -26,4 +26,4 @@ jobs:
           sudo mv gitleaks /usr/local/bin/
 
       - name: Gitleaks scan (fails on any finding)
-        run: gitleaks detect --source . --verbose --redact --exit-code 1git add .github/workflows/ci.yml
+        run: gitleaks detect --source . --verbose --redact --exit-code 1
