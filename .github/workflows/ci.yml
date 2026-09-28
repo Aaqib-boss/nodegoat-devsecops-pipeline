@@ -52,7 +52,7 @@ jobs:
 
       - name: npm audit (fails on high or critical)
         run: npm audit --audit-level=high
-        
+
   container-scan:
     runs-on: ubuntu-latest
     steps:
@@ -61,10 +61,10 @@ jobs:
       - name: Build Docker image
         run: docker build -t nodegoat:scan .
 
+      - name: Install Trivy
+        run: |
+          curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.74.0/trivy_0.74.0_Linux-64bit.tar.gz | tar -xz trivy
+          sudo mv trivy /usr/local/bin/
+
       - name: Trivy image scan (fails on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: nodegoat:scan
-          severity: HIGH,CRITICAL
-          exit-code: 1
-          ignore-unfixed: true
+        run: trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 nodegoat:scan
