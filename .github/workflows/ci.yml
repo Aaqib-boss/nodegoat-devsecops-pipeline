@@ -27,7 +27,7 @@ jobs:
 
       - name: Gitleaks scan (fails on any finding)
         run: gitleaks detect --source . --verbose --redact --exit-code 1
-        
+
   sast:
     runs-on: ubuntu-latest
     container:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Semgrep scan (fails on findings)
         run: semgrep scan --config p/javascript --config p/nodejs --error
-        
+
   dependency-scan:
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: 18
 
-           - name: Generate lockfile (needed by npm audit)
+      - name: Generate lockfile (needed by npm audit)
         run: npm install --package-lock-only --ignore-scripts
 
       - name: npm audit (fails on high or critical)
