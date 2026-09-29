@@ -32,3 +32,4 @@ test/e2e/videos/
 
 artifacts/cert/*.key
 artifacts/cert/*.crt
+gitleaks-report.json
