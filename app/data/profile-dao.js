@@ -9,7 +9,7 @@ function ProfileDAO(db) {
         console.log("Warning: ProfileDAO constructor called without 'new' operator");
         return new ProfileDAO(db);
     }
-
+    const ESAPI = require("node-esapi");
     const users = db.collection("users");
 
     /* Fix for A6 - Sensitive Data Exposure
@@ -44,10 +44,10 @@ function ProfileDAO(db) {
         // Create user document
         const user = {};
         if (firstName) {
-            user.firstName = firstName;
+            user.firstName = ESAPI.encoder().encodeForHTML(firstName);
         }
         if (lastName) {
-            user.lastName = lastName;
+            user.lastName = ESAPI.encoder().encodeForHTML(lastName);
         }
         if (address) {
             user.address = address;

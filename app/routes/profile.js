@@ -61,7 +61,8 @@ function ProfileHandler(db) {
         const testComplyWithRequirements = regexPattern.test(bankRouting);
         // if the regex test fails we do not allow saving
         if (testComplyWithRequirements !== true) {
-            const firstNameSafeString = firstName;
+            const firstNameSafeString = ESAPI.encoder().encodeForURL(firstName);
+            const lastNameSafeString = ESAPI.encoder().encodeForURL(lastName);
             return res.render("profile", {
                 updateError: "Bank Routing number does not comply with requirements for format specified",
                 firstNameSafeString,
