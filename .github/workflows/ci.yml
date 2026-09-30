@@ -47,9 +47,6 @@ jobs:
         with:
           node-version: 18
 
-      - name: Generate lockfile (needed by npm audit)
-        run: npm install --package-lock-only --ignore-scripts
-
       - name: npm audit (fails on high or critical)
         run: npm audit --audit-level=high
 
