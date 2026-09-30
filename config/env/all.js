@@ -6,7 +6,7 @@ module.exports = {
     port,
     db,
     cookieSecret: process.env.SESSION_SECRET || "session_cookie_secret_key_here",
-    cryptoKey: process.env.CRYPTO_KEY || "a_secure_key_for_crypto_here",
+    cryptoKey: "a_secure_key_for_crypto_here",
     cryptoAlgo: "aes256",
     hostName: "localhost",
     environmentalScripts: []

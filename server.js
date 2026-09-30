@@ -130,7 +130,7 @@ MongoClient.connect(db, (err, client) => {
     app.locals.marked = marked;
 
     // Application routes
-     routes(app, database);
+    routes(app, database);
 
     // Template system setup
     swig.setDefaults({
