@@ -30,4 +30,7 @@ test/e2e/videos/
 # ignore Snyk Code scanner files
 .dccache
 
+artifacts/cert/*.key
+artifacts/cert/*.crt
+gitleaks-report.json
  cookies.txt

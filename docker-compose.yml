@@ -17,6 +17,8 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongo:27017/nodegoat
       - SESSION_SECRET=${SESSION_SECRET}
+      - ZAP_API_KEY=${ZAP_API_KEY}
+      - CRYPTO_KEY=${CRYPTO_KEY}
       - NODE_ENV=development
       - PORT=4000
     ports:
