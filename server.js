@@ -27,12 +27,13 @@ const httpsOptions = {
 };
 */
 
-MongoClient.connect(db, (err, db) => {
+MongoClient.connect(db, (err, client) => {
     if (err) {
         console.log("Error: DB: connect");
         console.log(err);
         process.exit(1);
     }
+    const database = client.db();
     console.log(`Connected to the database`);
 
     /*
@@ -129,7 +130,7 @@ MongoClient.connect(db, (err, db) => {
     app.locals.marked = marked;
 
     // Application routes
-    routes(app, db);
+     routes(app, database);
 
     // Template system setup
     swig.setDefaults({
