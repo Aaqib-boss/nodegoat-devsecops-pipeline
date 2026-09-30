@@ -1,16 +1,17 @@
-# STRIDE Threat Model — NodeGoat
+# STRIDE Threat Model: NodeGoat
 
-| # | STRIDE Category | Threat (application-specific) | Likelihood | Impact | Justification | Mitigating Control | Location in Codebase/Pipeline |
+| # | STRIDE | Threat (application-specific) | Likelihood | Impact | Justification | Mitigating control | Location |
 |---|---|---|---|---|---|---|---|
-| 1 | Tampering / Injection | NoSQL injection via unsanitized input in profile/allocation query fields, allowing an attacker to manipulate query logic and retrieve or alter unauthorized data | High | High | NodeGoat deliberately leaves these query paths unsanitized; exploitation requires no special tooling, just crafted input in a standard form field | Parameterized queries and input validation before any value is passed into a MongoDB query | `app/routes/*.js`, `app/data/*.js` |
-| 2 | Spoofing | Weak session management (predictable/static session secret, no session regeneration on login) allows session fixation or hijacking | Medium | High | Requires the attacker to obtain or predict a session identifier, which is harder than the injection case, but a successful hijack grants full account access | Strong random `SESSION_SECRET` sourced from environment/secrets store, `httpOnly`/`secure` cookie flags, session ID regenerated on successful login | `app/routes/session.js`, `server.js` |
-| 3 | Tampering (Stored XSS) | Unescaped user-supplied input (e.g. profile or contribution fields) is rendered back to other users, allowing stored script execution | High | Medium | Easy to trigger (just submit a script tag in a form), impact limited to client-side actions in the victim's session rather than direct server compromise | Output encoding via auto-escaping template syntax, and a Content-Security-Policy header restricting inline script execution | `app/views/*.ejs` |
-| 4 | Elevation of Privilege / Insecure Direct Object Reference | A user can access or modify another user's allocation/contribution record by changing an ID in the URL or request body, without any server-side ownership check | Medium | High | Requires the attacker to know or guess another user's record ID, but once found, the exploit is trivial and grants unauthorized read/write access to another user's data | Server-side authorization check verifying the requested record belongs to the authenticated session user before returning or mutating it | `app/routes/contributions.js`, `app/routes/allocations.js` |
+| 1 | Tampering | NoSQL/JavaScript injection: the `threshold` query parameter of `/allocations/:userId` is interpolated into a MongoDB `$where` string (CWE-943) | High | High | Any logged-in user controls the parameter and no tooling is needed; injected JavaScript runs inside MongoDB and can read other users' data | Validate `threshold` as an integer and replace `$where` with a standard query using `$gt` | `app/data/allocations-dao.js` (lines 73, 78) |
+| 2 | Tampering / Elevation of Privilege | Server-side code injection: `preTax`, `afterTax` and `roth` are passed to `eval()` (CWE-95) | High | High | Signup is open, so any visitor can reach the form; eval gives arbitrary JavaScript execution in the Node process, including access to its environment variables | Replace `eval()` with `parseInt()` and a range check on each field | `app/routes/contributions.js` (lines 32-34) |
+| 3 | Spoofing | Session fixation: login does not regenerate the session ID, so a pre-login session ID stays valid afterwards (CWE-384); distinct username/password errors allow user enumeration | Medium | High | The attacker must plant a session ID in the victim's browser, which is harder than injection, but success gives full account takeover | Call `req.session.regenerate()` on login, return one generic error message, and load the cookie secret from an environment variable | `app/routes/session.js`, `config/env/all.js` |
+| 4 | Tampering (Stored XSS) | swig autoescape is disabled, so user-supplied content is rendered as raw HTML to other users (CWE-79) | High | Medium | Any user can store a script payload; impact is limited to the victim's browser session, not the server | Set `autoescape: true` and add a Content-Security-Policy via helmet | `server.js` (lines 135-137), `app/views/*.html` |
+| 5 | Information Disclosure | IDOR: `/allocations/:userId` trusts the ID in the URL instead of the logged-in user (CWE-639) | High | Medium | User IDs appear to be sequential integers, so guessing is trivial; exposure is limited to other users' allocation data | Take `userId` from `req.session` and ignore the URL parameter | `app/routes/allocations.js` |
 
-**Risk matrix reference (3x3):**
+## Risk matrix (3x3)
 
-| | Low Impact | Medium Impact | High Impact |
+| | Low impact | Medium impact | High impact |
 |---|---|---|---|
-| **High Likelihood** | — | Threat 3 | Threat 1 |
-| **Medium Likelihood** | — | — | Threats 2, 4 |
-| **Low Likelihood** | — | — | — |
+| **High likelihood** | | Threats 4, 5 | Threats 1, 2 |
+| **Medium likelihood** | | | Threat 3 |
+| **Low likelihood** | | | |
